@@ -1,0 +1,451 @@
+<!DOCTYPE html>
+
+<html lang="en">
+
+	<head>
+  		<title> DEEPRESHAN_PONG </title>
+  		<meta charset="UTF-8">
+  		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  		<link rel="stylesheet" href="https://cdnjs.cloudfare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+  		<link rel="stylesheet" href="style.css">
+  		<script src="./processing.js"></script>
+
+  		<script type="text/processing" data-processing-target="processing-canvas">
+  			class ball {
+      			float dia_x = 17;
+      			float dia_y = 17;
+      			float speed_x; // how much should we increment the ball in the x direction
+      			float speed_y; // how much should we increment the ball in the y direction
+      			float x;
+      			float y;
+
+      			// Draws the ball
+     			void show(){
+        			noStroke();
+        			fill(0);
+        			ellipseMode(CENTER);
+        			ellipse(x, y, dia_x, dia_y);
+      			}
+
+      			// Updating the the velocity and direction of the ball
+      			void update(){
+       			if (y <= 5 || y >= 673) { // ball touches cieling or flour
+       				speed_y = -speed_y;
+        		}
+
+        		// ball touches player1
+        		if (((x <= X_POS_1 + 20) && (x >= X_POS_1 + 10)) && ((p1.y_pos >= y - p1.rect_height) && (p1.y_pos <= y))) { 
+          			speed_x = -speed_x;
+          			score++;
+          			speed_x += 0.35;
+          			y_change_counter++;
+          			if (y_change_counter == 5) {
+              			if ((speed_x > 0 || speed_x < 0) && (speed_y < 0)) {
+                			speed_y -= 0.3;
+                			y_change_counter = 0;
+             			 }
+              			else if ((speed_x > 0 || speed_x < 0) && (speed_y > 0)) {
+                			speed_y += 0.35;
+                			y_change_counter = 0;
+              			}
+          			}
+       			}
+
+       			// ball touches player2
+        		if (((x >= 875) && (x <= 885)) && ((p2.y_pos >= y - p2.rect_height) && (p2.y_pos <= y))) { 
+          			speed_x = -speed_x;
+          			y_change_counter++;
+          			// Modify the angle of the ball reflection to avoid game deadlock
+          			if (y_change_counter == 5) {
+              			if ((speed_x > 0 || speed_x < 0) && (speed_y < 0)) {
+              				speed_y -= 0.3;
+                			y_change_counter = 0;
+              			}
+          				else if ((speed_x > 0 || speed_x < 0) && (speed_y > 0)) {
+               				speed_y += 0.3;
+               				y_change_counter = 0;
+             			}
+           			}
+         		}
+
+         		// Ball is out of range (gameover)
+        		if (((x >= 25) && (x <= 75)) || ((x >= 925) && (x <= 975))) { 
+          			gameover = 1;
+          			start = 0;
+            			if (score > highscore) {
+              				highscore = score;
+            			}
+          			score = 0;
+          			// Reset player and ball positions
+          				p1.x_pos = X_POS_1;
+          				p2.x_pos = X_POS_2;
+				        p1.y_pos = mouseY;
+				        p2.y_pos = height / 2 + 70;
+				        b.x = 475;
+				        b.y = height / 2;
+				        b.speed_x = -3;
+				        b.speed_y = 1;
+        		}
+
+        		x += speed_x;
+        		y += speed_y;
+        	}
+    	}
+
+
+			class player {
+				   int rect_width = 15;
+				   int rect_height = 70;
+				   float x_pos;
+				   float y_pos;
+
+				   void show(){
+				   noStroke();
+				   fill(0);
+				   rect(x_pos, y_pos, rect_width, rect_height, 7);
+  			}
+
+				  // Updates the y-movement of p2 according to the direction and speed of the ball which it will take as arguments
+				  // The function receives (in order) the speed (x&y) of the ball as well as its position.
+				  void update(float sx, float sy, float bx, float by, int l){
+				    float m = sy / sx; // slope of the director line of the ball
+				    float b = by - m * (bx); // y-intercept of the director line of the ball completing its equation
+				    float target_height = (m * (l) + b) - rect_height / 2;
+
+				    // ATTEMPTING TO MAKE THE AI REACH THE TARGET HIGHT GRACEFULLY
+				    float travel_distance = y_pos - target_height;
+				    if (travel_distance > 0) {
+				        if (y_pos != target_height) {
+				            y_pos -= abs(travel_distance / 10);
+				          }
+				        }
+				    else if (travel_distance < 0) {
+				       if (y_pos != target_height) {
+				           y_pos += abs(travel_distance / 10);
+				       }
+				   }
+				   p1.y_pos = mouseY-35;
+				 }
+				}
+
+
+				class Drop {
+				   float x;
+				   float y;
+				   float z; // z position of drop , determines whether the drop is far or near
+				   float len; // length of the drop
+				   float yspeed; // speed of te drop
+
+				   Drop() {
+				       x = random(width);
+				       y = random(-500, -50);
+				       z = random(0, 20);
+				       len = map(z, 0, 20, 10, 20);
+				       yspeed = map(z, 0, 20, 1, 20);
+				   }
+
+				   void fall() { // function  to determine the speed and shape of the drop
+				     y = y + yspeed; // increment y position to give the effect of falling
+				     float grav = map(z, 0, 20, 0, 0.2); // if z is near then gravity on drop is more
+				     yspeed = yspeed + grav; // speed increases as gravity acts on the drop
+
+				     // Creating the droplet effect
+				     if (y >= height - 20) {
+				        for (int i = 0; i <= random(10, 20); i++) {
+				            fill(138, 43, 226);
+				            float r = random(1, 2);
+				            ellipse(random(x - 10, x + 10), random(height - 23, height - 20), r, r);
+				          }
+				        }
+
+				        if (y > height) { // repositions the drop after it has 'disappeared' from screen
+				          y = random(-200, -100);
+				          yspeed = map(z, 0, 20, 4, 10);
+				        }
+				      }
+
+				      void show_og() { // function to render the drop onto the screen
+				        float thick = map(z, 0, 20, 1, 3); //if z is near , drop is more thicker
+				        strokeWeight(thick); // weight of the drop
+				        stroke(138, 43, 226); // purple color
+				        line(x, y, x, y + len); // draws the line with two points
+				      }
+
+				      void show() { // function to render the drop onto the screen
+				        float thick = map(z, 0, 20, 1, 3);
+				        strokeWeight(thick); // weight of the drop
+				        stroke(138, 43, 226);
+				        line(x, y, x, y + len); // draws the line with two points
+				      }
+				}
+
+				Drop[] drops = new Drop[20]; // array of drop objects
+
+				PFont font; // Creating a loader for game text font
+
+				// DECLARING THE BALL AND INITIALIZING ITS CONSTANTS
+				ball b = new ball();
+
+				// DECLARING THE STARTING PLAYERS AND INITIALIZING THEIR CONSTANTS
+				int X_POS_1 = 100;
+				int X_POS_2 = 885;
+				player p1 = new player();
+				player p2 = new player();
+
+				// GLOBAL GAME INDICATORS
+				int score = 0;
+				int highscore = 0;
+				int start = 0;
+				int gameover = 0;
+				int starting_sequence = 0;
+
+				// GLOBAL DIMENSIONS OF THE START BUTTON
+				float sb_x = 398;
+				float sb_y = 480;
+				float sb_w = 200;
+				float sb_h = 90;
+
+				// THE VARIABLE i USED TO VARIATE THE EXPANDING RECTANGLE'S COLOUR IN THE STARTING ANIMATION.
+				float i = 2;
+
+				// THIS IS ITERATED EVERYTIME A PLAYER HITS THE BALL, WHEN IT REACHES A CERTAIN VALUE, WE ITERATE THE CHANGE IN y IN ORDER TO PREVENT THE GAME FROM
+				// BECOMING LINEAR.
+				float y_change_counter = 0;
+
+				void setup() {
+				  //sound 2
+				  //   file_2 = new SoundFile(this, "stinky.aiff");
+				  //   file_2.loop();
+
+				   // MAIN SETUP
+				   background(220, 220, 240);
+				   frameRate(120);
+				   size(1000, 700);
+				   smooth(4);
+
+				   // INITIALIZING THE PLAYERS
+				   p1.x_pos = X_POS_1;
+				   p2.x_pos = X_POS_2;
+				   p1.y_pos = random(300, 400);
+				   p2.y_pos = random(300, 400);
+
+				   // INITIALIZING THE BALL'S POSITION
+				   b.x = 475;
+				   b.y = height / 2;
+				   b.speed_x = random(-2,-1.5); // (-1.5,-1.1)
+				   b.speed_y = random(0.2,0.6); //(0.2,0.6)
+
+				   // INITIALIZING EACH DROP
+				   for (int i = 0; i < drops.length; i++) {
+				       drops[i] = new Drop();
+				   }
+
+				   // LOADING THE FONT AND STORING IT IN THE VARIABLE font
+				   font = createFont("yelaanallabiayre",32);
+				   textFont(font);
+				}
+
+				void draw() {
+
+				   // START MENU
+				   // keeps printing this version (start menu) until the player presses start
+				   if (start == 0 && gameover == 0 && starting_sequence == 0) {
+				       background(220, 220, 240);
+				       // Draws the title and the start button
+
+				       textSize(15);
+				       fill(0);
+				       text("by Karim El Kheshen", 358 , height - 55);
+
+				       draw_title();
+				       draw_start_button();
+				       if (highscore < 10) {
+				           draw_highscore(482, height / 2 + 60);
+				       }
+				       else if (highscore > 9) {
+				           draw_highscore(460, height / 2 + 60);
+				       }
+
+				       // Draws the rain background
+				       noStroke();
+				       fill(138, 43, 226);
+				       rect(0, height - 20, width, 20);
+				       for (int i = 0; i < drops.length; i++) {
+				           drops[i].fall();
+				           drops[i].show_og();
+				       }
+				   }
+
+				   // Displays the starting sequence animation
+				   if (start == 1 && starting_sequence == 1 && gameover == 0) {
+
+				       // Keeps updating the expansion of the start button rectangle
+				       sb_x -= 1.5 * 8.125;
+				       sb_y -= 1.5 * 10;
+				       sb_w += 1.5 * 16;
+				       sb_h += 1.5 * 12;
+
+				       // Lets the previous background, title, and highscore stay behind the expansion of the rectangle
+				       background(220, 220, 240);
+				       draw_title();
+				       draw_highscore(485, height / 2 + 80);
+
+				       // The block is for both the expansion of the start button rectangle and the variation of its color
+				       fill(138 + i, 43 + 2.158536 * i, 226 + 0.1707317 * i);
+				       noStroke();
+				       rect(sb_x, sb_y, sb_w, sb_h, 7);
+				       i += 0.5;
+
+				       // keeps drawing the bottom ground in the same color and size as before
+				       noStroke();
+				       fill(138, 43, 226);
+				       rect(0, height - 20, width, 20);
+
+				       // Checks for the maximum expansion of the rectangle and resets the values for another game.
+				       if (sb_x == 0 || sb_y == 0 || sb_w == width || sb_h == height) {
+				           starting_sequence = 0;
+				           sb_x = 398;
+				           sb_y = 480;
+				           sb_w = 200;
+				           sb_h = 90;
+				           i = 2;
+				       }
+				   }
+
+				   // GAME STARTS
+				   if (gameover == 0 && start == 1 && starting_sequence == 0) {
+
+				       // keeps drawing the background
+				       background(220, 220, 240);
+
+				       // Draws the current score of the player
+				       draw_score(475, 100);
+
+				       // keeps drawing the falling drops
+				       noStroke();
+				       fill(138, 43, 226);
+				       rect(0, height - 20, width, 20);
+				       for (int i = 0; i < drops.length; i++) {
+				           drops[i].fall();
+				           drops[i].show();
+				       }
+
+				       // DRAWS THE 2 PLAYERS
+				       //p1.y_pos = mouseY-35;
+				       p1.show();
+				       p2.show();
+				       p1.y_pos = mouseY-35;
+
+				       // DRAWS THE BALL
+				       b.show();
+				       b.update();
+
+				       //update player2
+				       p2.update(b.speed_x, b.speed_y, b.x, b.y, X_POS_2);
+				   }
+
+				   if (gameover == 1 && start == 0 && starting_sequence == 0) {
+
+				       // keeps drawing the background
+				       background(220, 220, 240);
+
+				       // keeps drawing the falling drops
+				       noStroke();
+				       fill(138, 43, 226);
+				       rect(0, height - 20, width, 20);
+				       for (int i = 0; i < drops.length; i++) {
+				           drops[i].fall();
+				           drops[i].show();
+				       }
+
+				       draw_gameover();
+
+				       // Highscore:
+				       textSize(25);
+				       fill(0);
+				       text("YOUR HIGHSCORE : ", 235, 240);
+				       fill(138, 43, 226);
+				       text(highscore, 675, 240);
+
+				       // Tells the player how to retry
+				       textSize(20);
+				       fill(255);
+				       text("Press ", 250, height - 155);
+				       fill(209, 23, 42);
+				       text("RETURN", 360, height - 155);
+				       fill(255);
+				       text(" to play again", 464, height - 155);
+				   }
+				}
+
+				void draw_title(){
+				   textSize(80);
+				   fill(0);
+				   text("DEEPRESHAN", 105, 180);
+				   text("PONG", 345, 280);
+				}
+
+				void draw_gameover(){
+				   textSize(100);
+				   fill(0);
+				   text("GAMEOVER", 105, 180);
+				}
+
+				void draw_highscore(int x, int y){
+				   textSize(40);
+				   fill(138, 43, 226);
+				   text(highscore, x, y);
+				}
+
+				void draw_score(int x, int y){
+				   textSize(50);
+				   fill(138, 43, 226);
+				   text(score, x, y);
+				}
+
+				void draw_start_button(){
+				   if (((mouseX >= 390) && (mouseX <= 590)) && ((mouseY >= 480) && (mouseY <= 570))) { // Check if the mouse is hovering over the start button
+				       fill(138, 43, 226);
+				       stroke(0);
+				       strokeWeight(3);
+				       rect(sb_x, sb_y, sb_w, sb_h, 7);
+				       textSize(35);
+				       fill(255);
+				       text("START", 415, height - 155);
+				   }
+				   else {
+				       fill(255);
+				       stroke(0);
+				       strokeWeight(3);
+				       rect(sb_x, sb_y, sb_w, sb_h, 7);
+				       textSize(35);
+				       fill(0);
+				       text("START", 415, height - 155);
+				   }
+				}
+
+				void mousePressed(){
+				   if (((mouseX >= 390) && (mouseX <= 590)) && ((mouseY >= 480) && (mouseY <= 570))) {
+				       start = 1;
+				       starting_sequence = 1;
+				   }
+				}
+
+				void keyPressed(){
+				   if (key == RETURN || key == ENTER) {
+				       gameover = 0;
+				   }
+				}
+  		</script>
+
+		</head>
+
+		<body>
+
+  		<div>
+    		<canvas id="processing-canvas"></canvas>
+ 		</div>
+
+		</body>
+
+</html>
