@@ -2,15 +2,15 @@
 
 <html lang="en">
 
-	<head>
-  		<title> DEEPRESHAN_PONG </title>
-  		<meta charset="UTF-8">
-  		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-  		<link rel="stylesheet" href="https://cdnjs.cloudfare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
-  		<link rel="stylesheet" href="style.css">
-  		<script src="./processing.js"></script>
+<head>
+	<title> DEEPRESHAN_PONG </title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" href="https://cdnjs.cloudfare.com/ajax/libs/normalize/7.0.0/normalize.min.css">
+	<link rel="stylesheet" href="style.css">
+	<script src="./processing.js"></script>
 
-  		<script type="text/processing" data-processing-target="processing-canvas">
+	<script type="text/processing" data-processing-target="processing-canvas">
   			class ball {
       			float dia_x = 17;
       			float dia_y = 17;
@@ -213,9 +213,6 @@
 				float y_change_counter = 0;
 
 				void setup() {
-				  //sound 2
-				  //   file_2 = new SoundFile(this, "stinky.aiff");
-				  //   file_2.loop();
 
 				   // MAIN SETUP
 				   background(220, 220, 240);
@@ -229,10 +226,10 @@
 				   p1.y_pos = random(300, 400);
 				   p2.y_pos = random(300, 400);
 
-				   // INITIALIZING THE BALL'S POSITION
+				   // INITIALIZING THE BALL'S POSITION AND SPEED
 				   b.x = 475;
 				   b.y = height / 2;
-				   b.speed_x = random(-2,-1.5); // (-1.5,-1.1)
+				   b.speed_x = random(-3,-2.75); // (-1.5,-1.1)
 				   b.speed_y = random(0.2,0.6); //(0.2,0.6)
 
 				   // INITIALIZING EACH DROP
@@ -241,7 +238,7 @@
 				   }
 
 				   // LOADING THE FONT AND STORING IT IN THE VARIABLE font
-				   font = createFont("yelaanallabiayre",32);
+				   font = createFont("mainFont",32);
 				   textFont(font);
 				}
 
@@ -409,18 +406,18 @@
 				       stroke(0);
 				       strokeWeight(3);
 				       rect(sb_x, sb_y, sb_w, sb_h, 7);
-				       textSize(35);
+				       textSize(30);
 				       fill(255);
-				       text("START", 415, height - 155);
+				       text("START", 425, height - 155);
 				   }
 				   else {
 				       fill(255);
 				       stroke(0);
 				       strokeWeight(3);
 				       rect(sb_x, sb_y, sb_w, sb_h, 7);
-				       textSize(35);
+				       textSize(30);
 				       fill(0);
-				       text("START", 415, height - 155);
+				       text("START", 425, height - 155);
 				   }
 				}
 
@@ -438,14 +435,14 @@
 				}
   		</script>
 
-		</head>
+</head>
 
-		<body>
+<body>
 
-  		<div>
-    		<canvas id="processing-canvas"></canvas>
- 		</div>
+	<div>
+		<canvas id="processing-canvas"></canvas>
+	</div>
 
-		</body>
+</body>
 
 </html>

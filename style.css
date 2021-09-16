@@ -1,12 +1,6 @@
 @font-face {
-  font-family: yelaanallabiayre;
+  font-family: mainFont;
   src: url("fonts/PressStart2P.ttf");
-}
-
-
-@font-face {
-  font-family: RobotoThicc;
-  src: url("fonts/Oswald-SemiBold.ttf");
 }
 
 
@@ -18,7 +12,7 @@
 
 
 body {
-  background: rgb(18, 2, 37);
+  background: rgb(199, 188, 204);
   width: 100%;
   overflow-x: hidden;
 }
